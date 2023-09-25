@@ -1,32 +1,34 @@
 #include "Arduino.h"
-#include "arduino_homekit_server.h"
+// #include "arduino_homekit_server.h"
 #include "PhysicalButton/PhysicalButton.h"  // Импорт нового класса PhysicalButton
-// #include "WiFiConfig.h"
+#include "WiFiConfig/WiFiConfig.h"
+#include "LampController.h"  // Импорт класса LampController
 
-extern "C" homekit_server_config_t config;
-extern "C" homekit_characteristic_t name;
+// extern "C" homekit_server_config_t config;
+// extern "C" homekit_characteristic_t name;
 extern "C" char ACCESSORY_NAME[32];
 extern "C" void accessory_init();
 
 #define PIN_LED 2
-#define PIN_BTN 4  // Добавьте ваш пин кнопки
+#define PIN_BTN 4  // Пин кнопки
+#define PIN_LAMP 5  // Пин для лампочки
 
-// WiFiConfig wifiConfig("Orange_Swiatlowod_AFEA_2.4", "R7EP375RFJHF");
+WiFiConfig wifiConfig("Orange_Swiatlowod_AFEA_2.4", "R7EP375RFJHF");
 PhysicalButton physicalButton(PIN_BTN);  // Создание объекта класса PhysicalButton
+LampController lamp(PIN_LAMP);  // Создание объекта lamp класса LampController
 
 void setup() {
   Serial.begin(115200);
-  // wifiConfig.connectToWiFi();
-  pinMode(PIN_LED, OUTPUT);
+  
+  wifiConfig.connectToWiFi();  //инициализация wifi
+  
   physicalButton.begin();  // Инициализация кнопки
-  // homekit_setup();
+  homekit_setup(); //инициализация apple home
+  lamp.turnOff();  // Инициализация лампочки (выключена)
+
+    pinMode(PIN_LED, OUTPUT);
 }
 
-extern "C" void led_toggle() {
-  static bool ledState = false;
-  ledState = !ledState;
-  digitalWrite(PIN_LED, ledState ? HIGH : LOW);
-}
 
 void loop() {
 
@@ -40,10 +42,13 @@ void loop() {
     next_heap_millis = time + 5000;  // Установка времени для следующего вывода
   }
   
+  // Здесь можно добавить код для управления лампочкой через LampController
+  // Например, lampController.turnOn(); или lampController.setBrightness(128);
+  
   delay(5);  // Задержка в 5 миллисекунд для стабильности работы
 }
 
 void homekit_setup() {
   accessory_init();
-  arduino_homekit_setup(&config);
+  // arduino_homekit_setup(&config);
 }
