@@ -15,9 +15,8 @@ enum PhysicalButtonEvent {
 
 
 // Определение структуры для хранения информации о кнопке
-typedef struct {
-  // ... (все поля из вашей структуры ESPButtonEntry)
-  	uint8_t id = -1;
+typedef struct ButtonEntry {
+  uint8_t id = -1;
 	uint8_t pin = -1;
 	uint8_t pin_down_digital = LOW; // цифровое значение при нажатии
 
@@ -44,7 +43,8 @@ typedef struct {
 	bool longclick_enable = true;
 	bool doubleclick_enable = true;
 	//======
-	struct _ESPButtonEntry *next;
+  ButtonEntry* next = nullptr;
+
 } ButtonEntry;
 
 
@@ -55,9 +55,9 @@ public:
   // Определение типа для коллбэка
   typedef std::function<void(uint8_t id, PhysicalButtonEvent event)> physicalbutton_callback;
 
-  // Конструктор и деструктор
-  PhysicalButton();
-  ~PhysicalButton();
+
+  PhysicalButton(); //конструктор
+  ~PhysicalButton(); //деструктор
 
   // Инициализация
   void begin();
@@ -102,6 +102,11 @@ private:
 
   // Уведомление о событии
   void notifyEvent(ButtonEntry *entry, PhysicalButtonEvent event);
+
+  static void staticTick(PhysicalButton *instance) {
+    instance->tick();
+}
+
 };
 
 #endif // PHYSICAL_BUTTON_H

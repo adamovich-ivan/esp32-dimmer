@@ -3,6 +3,7 @@
 #include "PhysicalButton/PhysicalButton.h"  // Импорт нового класса PhysicalButton
 #include "WiFiConfig/WiFiConfig.h"
 #include "LampController.h"  // Импорт класса LampController
+#include "ObserverPattern.h" // импорт паттерна наблюдатель
 
 // extern "C" homekit_server_config_t config;
 // extern "C" homekit_characteristic_t name;
@@ -18,15 +19,26 @@ PhysicalButton physicalButton(PIN_BTN);  // Создание объекта кл
 LampController lamp(PIN_LAMP);  // Создание объекта lamp класса LampController
 
 void setup() {
+  
   Serial.begin(115200);
-  
-  wifiConfig.connectToWiFi();  //инициализация wifi
-  
-  physicalButton.begin();  // Инициализация кнопки
-  homekit_setup(); //инициализация apple home
-  lamp.turnOff();  // Инициализация лампочки (выключена)
 
-    pinMode(PIN_LED, OUTPUT);
+
+  physicalButton.begin();  // Инициализация кнопки
+
+
+  physicalButton.setCallback([](uint8_t id, PhysicalButtonEvent event) {
+    if (event == PHYSICALBUTTONEVENT_SINGLECLICK) {
+      lamp.toggle();  // Переключение состояния лампочки
+    }
+  });
+  
+  // wifiConfig.connectToWiFi();  //инициализация wifi
+  
+
+  // homekit_setup(); //инициализация apple home
+  // lamp.turnOff();  // Инициализация лампочки (выключена) <- надо удалить и заменить на запись состояни лампочки при изменении
+
+  pinMode(PIN_LED, OUTPUT);
 }
 
 

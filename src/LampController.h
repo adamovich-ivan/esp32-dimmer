@@ -2,36 +2,25 @@
 #define LAMP_CONTROLLER_H
 
 #include <Arduino.h>
+#include "ObserverPattern.h"
 
-class LampController {
+class LampController : public Subject {
 public:
-  LampController(int pin) : pin(pin) {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
-  }
-
-  void turnOn() {
-    digitalWrite(pin, HIGH);
-    brightness = 255;
-  }
-
-  void turnOff() {
-    digitalWrite(pin, LOW);
-    brightness = 0;
-  }
-
-  void setBrightness(int level) {
-    analogWrite(pin, level);
-    brightness = level;
-  }
-
-  int getBrightness() {
-    return brightness;
-  }
+  LampController(int pin);
+  void turnOn();
+  void turnOff();
+  void toggle();
+  void setBrightness(int level);
+  int getBrightness();
+  
+  void addObserver(Observer* observer) override;
+  void removeObserver(Observer* observer) override;
+  void notifyObservers() override;
 
 private:
   int pin;
   int brightness = 0;
+  bool isOn;
 };
 
 #endif // LAMP_CONTROLLER_H

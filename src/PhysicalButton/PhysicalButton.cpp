@@ -1,11 +1,11 @@
 #include "PhysicalButton.h"
-
-// Конструктор
+#include <Ticker.h> // Подключение библиотеки Ticker
+// Конструктор -> метод класса, который вызывается при создании объекта этого класса. Его задачей является инициализация объекта, установка начальных значений переменных и выполнение других необходимых действий
 PhysicalButton::PhysicalButton() {
   // Инициализация переменных и ресурсов здесь
 }
 
-// Деструктор
+// Деструктор -> метод класса, который вызывается перед уничтожением объекта. Он может выполнять различные операции, такие как освобождение ресурсов (например, памяти), закрытие файлов и т. д.
 PhysicalButton::~PhysicalButton() {
   // Освобождение ресурсов здесь
 }
@@ -13,7 +13,8 @@ PhysicalButton::~PhysicalButton() {
 // Инициализация
 void PhysicalButton::begin() {
   // Инициализация таймера и других ресурсов
-  ticker.attach_ms(10, [this] { this->tick(); });
+ ticker.attach_ms(10, PhysicalButton::staticTick, this);
+
 }
 
 // Добавление новой кнопки
@@ -41,7 +42,6 @@ void PhysicalButton::tick() {
   ButtonEntry* entry = entries;
   while (entry != nullptr) {
     tickEntry(entry);
-    entry = entry->next;
   }
 }
 
