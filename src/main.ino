@@ -2,7 +2,7 @@
 // #include "arduino_homekit_server.h"
 #include "PhysicalButton/PhysicalButton.h"  // Импорт нового класса PhysicalButton
 #include "WiFiConfig/WiFiConfig.h"
-#include "LampController.h"  // Импорт класса LampController
+#include "Lamp/LampController.h"  // Импорт класса LampController
 #include "ObserverPattern.h" // импорт паттерна наблюдатель
 
 // extern "C" homekit_server_config_t config;
