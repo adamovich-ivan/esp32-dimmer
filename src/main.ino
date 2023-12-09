@@ -1,66 +1,43 @@
-#include "Arduino.h"
-// #include "arduino_homekit_server.h"
-#include "PhysicalButton/PhysicalButton.h"  // Импорт нового класса PhysicalButton
-#include "WiFiConfig/WiFiConfig.h"
-#include "Lamp/LampController.h"  // Импорт класса LampController
-#include "ObserverPattern.h" // импорт паттерна наблюдатель
+#include "HomeSpan.h"  
 
-// extern "C" homekit_server_config_t config;
-// extern "C" homekit_characteristic_t name;
-extern "C" char ACCESSORY_NAME[32];
-extern "C" void accessory_init();
+class MyLightBulb : public Service::LightBulb {
+  public:
+    SpanCharacteristic *power;      
+    SpanCharacteristic *brightness; 
 
-#define PIN_LED 2
-#define PIN_BTN 4  // Пин кнопки
-#define PIN_LAMP 5  // Пин для лампочки
+    MyLightBulb() : Service::LightBulb() {
+      power = new Characteristic::On();
+      brightness = new Characteristic::Brightness(50); 
+    }
+ 
+    boolean update() {
+      // Здесь код для управления физическим устройством
+      return true;
+    }
+};
 
-WiFiConfig wifiConfig("Orange_Swiatlowod_AFEA_2.4", "R7EP375RFJHF");
-PhysicalButton physicalButton(PIN_BTN);  // Создание объекта класса PhysicalButton
-LampController lamp(PIN_LAMP);  // Создание объекта lamp класса LampController
+//Nazwa: Orange_Swiatlowod_60A0 
+//Hasło: No25UXzfUEevFYs9oG
 
 void setup() {
-  
-  Serial.begin(115200);
+  Serial.begin(115200); 
 
+  homeSpan.setPairingCode("11122333");
+  homeSpan.setQRID("111-22-333");
 
-  physicalButton.begin();  // Инициализация кнопки
+  homeSpan.begin(Category::Lighting,"HomeSpan LightBulb"); 
 
+  new SpanAccessory();                              
+  new Service::AccessoryInformation();            
+  new Characteristic::Identify();              
+  new Characteristic::Manufacturer("HomeSpan");   
+  new Characteristic::SerialNumber("123-ABC");    
+  new Characteristic::Model("120-Volt Lamp");     
+  new Characteristic::FirmwareRevision("0.9");    
 
-  physicalButton.setCallback([](uint8_t id, PhysicalButtonEvent event) {
-    if (event == PHYSICALBUTTONEVENT_SINGLECLICK) {
-      lamp.toggle();  // Переключение состояния лампочки
-    }
-  });
-  
-  // wifiConfig.connectToWiFi();  //инициализация wifi
-  
+  new MyLightBulb(); // Наш кастомный сервис для лампочки
+}  
 
-  // homekit_setup(); //инициализация apple home
-  // lamp.turnOff();  // Инициализация лампочки (выключена) <- надо удалить и заменить на запись состояни лампочки при изменении
-
-  pinMode(PIN_LED, OUTPUT);
-}
-
-
-void loop() {
-
-  physicalButton.loop();
-  uint32_t time = millis();  // Текущее время в миллисекундах
-  static uint32_t next_heap_millis = 0;  // Время для следующего вывода информации о куче
-
-  if (time > next_heap_millis) {  // Если пришло время для вывода
-    // Вывод информации о свободной памяти и других системных параметрах
-    printf("FreeHeap: %d B\n", ESP.getFreeHeap());
-    next_heap_millis = time + 5000;  // Установка времени для следующего вывода
-  }
-  
-  // Здесь можно добавить код для управления лампочкой через LampController
-  // Например, lampController.turnOn(); или lampController.setBrightness(128);
-  
-  delay(5);  // Задержка в 5 миллисекунд для стабильности работы
-}
-
-void homekit_setup() {
-  accessory_init();
-  // arduino_homekit_setup(&config);
-}
+void loop(){
+  homeSpan.poll();  // Запуск HomeSpan
+}  
