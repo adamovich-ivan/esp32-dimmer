@@ -1,27 +1,16 @@
-#include "HomeSpan.h"  
-
-class MyLightBulb : public Service::LightBulb {
-  public:
-    SpanCharacteristic *power;      
-    SpanCharacteristic *brightness; 
-
-    MyLightBulb() : Service::LightBulb() {
-      power = new Characteristic::On();
-      brightness = new Characteristic::Brightness(50); 
-    }
+// main.cpp
+#include "HomeSpan.h"
  
-    boolean update() {
-      // Здесь код для управления физическим устройством
-      return true;
-    }
-};
+#include "AppleHome/AppleHomeIntegration.h"
+#include "LedController.h"
 
-//Nazwa: Orange_Swiatlowod_60A0 
-//Hasło: No25UXzfUEevFYs9oG
+AppleHomeIntegration *appleHomeIntegration;
+LedController ledController(2); // Используйте пин, к которому подключен ваш светодиод
+ 
 
 void setup() {
-  Serial.begin(115200); 
-
+  Serial.begin(115200);
+  
   homeSpan.setPairingCode("11122333");
   homeSpan.setQRID("111-22-333");
 
@@ -33,11 +22,19 @@ void setup() {
   new Characteristic::Manufacturer("HomeSpan");   
   new Characteristic::SerialNumber("123-ABC");    
   new Characteristic::Model("120-Volt Lamp");     
-  new Characteristic::FirmwareRevision("0.9");    
+  new Characteristic::FirmwareRevision("0.9");   
 
-  new MyLightBulb(); // Наш кастомный сервис для лампочки
-}  
+ 
+  ledController.begin();
+  appleHomeIntegration = new AppleHomeIntegration(&ledController);
+}
 
-void loop(){
-  homeSpan.poll();  // Запуск HomeSpan
-}  
+
+void loop() {
+  homeSpan.poll();
+
+
+  // Пример использования:
+  // mySmartLight->setPower(true);
+  // mySmartLight->setBrightness(75);
+}
